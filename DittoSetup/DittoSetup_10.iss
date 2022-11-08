@@ -3,6 +3,7 @@
 #define MyAppVerName MyAppName + " " + MyAppVersion
 
 ;#define bit64
+#define bita64
   
 
 [Setup]
@@ -17,6 +18,10 @@ AppUpdatesURL=ditto-cp.sourceforge.net
 #ifdef bit64
   ArchitecturesInstallIn64BitMode=x64
   ArchitecturesAllowed=x64
+#endif
+#ifdef bita64
+  ArchitecturesInstallIn64BitMode=arm64
+  ArchitecturesAllowed=arm64
 #endif
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
@@ -82,14 +87,29 @@ Name: AddFireWallException; Description: Add Windows Firewall exception for Ditt
   Source: C:\Windows\sysnative\msvcp140.dll;  DestDir: {app}; Flags: ignoreversion
   Source: C:\Windows\sysnative\mfc140u.dll;  DestDir: {app}; Flags: ignoreversion
 #endif
-#ifndef bit64
-  Source: ..\Release\Ditto.exe; DestDir: {app}; DestName: Ditto.exe; Flags: ignoreversion; AfterInstall: AddProgramToFirewall(ExpandConstant('{app}\Ditto.exe'), 'Ditto_FromInstaller_32');
-  Source: ..\Release\ICU_Loader.dll; DestDir: {app}; Flags: ignoreversion
-  Source: ..\Release\Addins\DittoUtil.dll; DestDir: {app}\Addins; Flags: ignoreversion
+#ifdef bita64
+  Source: ..\Releasea64\Ditto.exe; DestDir: {app}; DestName: Ditto.exe; Flags: ignoreversion; AfterInstall: AddProgramToFirewall(ExpandConstant('{app}\Ditto.exe'), 'Ditto_FromInstaller_64');
+  Source: ..\Releasea64\ICU_Loader.dll; DestDir: {app}; Flags: ignoreversion
+  Source: ..\Releasea64\zlib1.dll; DestDir: {app}; Flags: ignoreversion
+  Source: ..\Releasea64\Addins\DittoUtil.dll; DestDir: {app}\Addins; Flags: ignoreversion
 
-  Source: C:\Windows\SysWOW64\vcruntime140.dll;  DestDir: {app}; Flags: ignoreversion
-  Source: C:\Windows\SysWOW64\msvcp140.dll;  DestDir: {app}; Flags: ignoreversion
-  Source: C:\Windows\SysWOW64\mfc140u.dll;  DestDir: {app}; Flags: ignoreversion
+  ; "C:\Windows\sysnative" will be converted to "C:\Windows\System32"
+  ; System32 stores a 64-bit DLL on x64 system
+  Source: C:\Windows\sysnative\vcruntime140.dll;  DestDir: {app}; Flags: ignoreversion
+  Source: C:\Windows\sysnative\vcruntime140_1.dll;  DestDir: {app}; Flags: ignoreversion 
+  Source: C:\Windows\sysnative\msvcp140.dll;  DestDir: {app}; Flags: ignoreversion
+  Source: C:\Windows\sysnative\mfc140u.dll;  DestDir: {app}; Flags: ignoreversion
+#endif
+#ifndef bit64
+  #ifndef bita64
+    Source: ..\Release\Ditto.exe; DestDir: {app}; DestName: Ditto.exe; Flags: ignoreversion; AfterInstall: AddProgramToFirewall(ExpandConstant('{app}\Ditto.exe'), 'Ditto_FromInstaller_32');
+    Source: ..\Release\ICU_Loader.dll; DestDir: {app}; Flags: ignoreversion
+    Source: ..\Release\Addins\DittoUtil.dll; DestDir: {app}\Addins; Flags: ignoreversion
+
+    Source: C:\Windows\SysWOW64\vcruntime140.dll;  DestDir: {app}; Flags: ignoreversion
+    Source: C:\Windows\SysWOW64\msvcp140.dll;  DestDir: {app}; Flags: ignoreversion
+    Source: C:\Windows\SysWOW64\mfc140u.dll;  DestDir: {app}; Flags: ignoreversion
+  #endif
 #endif
 
 Source: ..\Debug\Language\*; DestDir: {app}\Language; BeforeInstall: BeforeLanguageInstall()
